@@ -34,8 +34,7 @@ bridge:
     opp_ego_odom_topic: 'opp_odom'
     opp_drive_topic: 'opp_drive'
 
-    odom_frame: 'map'
-    # odom_frame: 'odom'
+    odom_frame: 'odom'
 
     # transform related
     scan_distance_to_base_link: 0.275
@@ -45,8 +44,8 @@ bridge:
     scan_beams: 1080
 
     # map parameters
-    map_path: '/sim_ws/src/f1tenth_gym_ros/maps/generated_from_levine'
-    map_img_ext: '.pgm'
+    map_path: '/sim_ws/src/f1tenth_gym_ros/maps/levine'
+    map_img_ext: '.png'
 
     # opponent parameters
     num_agent: 1

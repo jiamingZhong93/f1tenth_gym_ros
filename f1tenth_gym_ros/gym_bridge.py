@@ -44,6 +44,7 @@ class GymBridge(Node):
 
         self.declare_parameter('ego_namespace')
         self.declare_parameter('ego_odom_topic')
+        self.declare_parameter('odom_frame', 'odom')
         self.declare_parameter('ego_opp_odom_topic')
         self.declare_parameter('ego_scan_topic')
         self.declare_parameter('ego_drive_topic')
@@ -97,6 +98,7 @@ class GymBridge(Node):
         self.angle_max = scan_fov / 2.
         self.angle_inc = scan_fov / scan_beams
         self.ego_namespace = self.get_parameter('ego_namespace').value
+        self.odom_frame = self.get_parameter('odom_frame').value
         ego_odom_topic = self.ego_namespace + '/' + self.get_parameter('ego_odom_topic').value
         self.scan_distance_to_base_link = self.get_parameter('scan_distance_to_base_link').value
         
@@ -242,10 +244,23 @@ class GymBridge(Node):
         scan.header.frame_id = self.ego_namespace + '/laser'
         scan.angle_min = self.angle_min
         scan.angle_max = self.angle_max
-        scan.angle_increment = self.angle_inc
-        scan.range_min = 0.
-        scan.range_max = 30.
+        # scan.angle_increment = self.angle_inc
+        # scan.range_min = 0.
+        # scan.range_max = 30.
+        # scan.ranges = self.ego_scan
+
+        num_ranges = len(self.ego_scan)
+        if num_ranges > 1:
+            scan.angle_increment = (
+                scan.angle_max - scan.angle_min
+            ) / (num_ranges - 1)
+        else:
+            scan.angle_increment = 0.0
+
+        scan.range_min = 0.0
+        scan.range_max = 30.0
         scan.ranges = self.ego_scan
+
         self.ego_scan_pub.publish(scan)
 
         if self.has_opp:
@@ -254,10 +269,21 @@ class GymBridge(Node):
             opp_scan.header.frame_id = self.opp_namespace + '/laser'
             opp_scan.angle_min = self.angle_min
             opp_scan.angle_max = self.angle_max
-            opp_scan.angle_increment = self.angle_inc
-            opp_scan.range_min = 0.
-            opp_scan.range_max = 30.
+            # opp_scan.angle_increment = self.angle_inc
+            # opp_scan.range_min = 0.
+            # opp_scan.range_max = 30.
+            # opp_scan.ranges = self.opp_scan
+
+            num_ranges = len(self.opp_scan)
+            if num_ranges > 1:
+                opp_scan.angle_increment = (
+                    opp_scan.angle_max - opp_scan.angle_min
+                ) / (num_ranges - 1)
+            else:
+                opp_scan.angle_increment = 0.0
+
             opp_scan.ranges = self.opp_scan
+
             self.opp_scan_pub.publish(opp_scan)
 
         # pub tf
@@ -289,7 +315,8 @@ class GymBridge(Node):
     def _publish_odom(self, ts):
         ego_odom = Odometry()
         ego_odom.header.stamp = ts
-        ego_odom.header.frame_id = 'map'
+        # ego_odom.header.frame_id = 'map'
+        ego_odom.header.frame_id = self.odom_frame
         ego_odom.child_frame_id = self.ego_namespace + '/base_link'
         ego_odom.pose.pose.position.x = self.ego_pose[0]
         ego_odom.pose.pose.position.y = self.ego_pose[1]
@@ -306,7 +333,8 @@ class GymBridge(Node):
         if self.has_opp:
             opp_odom = Odometry()
             opp_odom.header.stamp = ts
-            opp_odom.header.frame_id = 'map'
+            # opp_odom.header.frame_id = 'map'
+            opp_odom.header.frame_id = self.odom_frame
             opp_odom.child_frame_id = self.opp_namespace + '/base_link'
             opp_odom.pose.pose.position.x = self.opp_pose[0]
             opp_odom.pose.pose.position.y = self.opp_pose[1]
@@ -336,7 +364,8 @@ class GymBridge(Node):
         ego_ts = TransformStamped()
         ego_ts.transform = ego_t
         ego_ts.header.stamp = ts
-        ego_ts.header.frame_id = 'map'
+        # ego_ts.header.frame_id = 'map'
+        ego_ts.header.frame_id = self.odom_frame
         ego_ts.child_frame_id = self.ego_namespace + '/base_link'
         self.br.sendTransform(ego_ts)
 
@@ -354,7 +383,8 @@ class GymBridge(Node):
             opp_ts = TransformStamped()
             opp_ts.transform = opp_t
             opp_ts.header.stamp = ts
-            opp_ts.header.frame_id = 'map'
+            # opp_ts.header.frame_id = 'map'
+            opp_ts.header.frame_id = self.odom_frame
             opp_ts.child_frame_id = self.opp_namespace + '/base_link'
             self.br.sendTransform(opp_ts)
 

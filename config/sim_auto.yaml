@@ -34,8 +34,8 @@ bridge:
     opp_ego_odom_topic: 'opp_odom'
     opp_drive_topic: 'opp_drive'
 
-    odom_frame: 'map'
-    # odom_frame: 'odom'
+    # odom_frame: 'map'
+    odom_frame: 'odom'
 
     # transform related
     scan_distance_to_base_link: 0.275
