@@ -71,6 +71,21 @@ rocker \
   --volume .:/sim_ws/src/f1tenth_gym_ros -- \
   f1tenth_gym_ros
 ```
+On Jetson:
+```bash
+rocker \
+  --nvidia \
+  --x11 \
+  --network host \
+  --ipc host \
+  --env ROS_DOMAIN_ID=99 \
+  --env ROS_LOCALHOST_ONLY=0 \
+  --env RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
+  --env NVIDIA_DRIVER_CAPABILITIES=compute,utility \
+  --env LIBGL_ALWAYS_SOFTWARE=1 \
+  --volume "$PWD:/sim_ws/src/f1tenth_gym_ros" -- \
+  f1tenth_gym_ros
+```
 
 ## Without an NVIDIA gpu:
 
